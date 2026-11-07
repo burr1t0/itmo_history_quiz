@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Квиз по истории университета ИТМО</title>
+<meta name="description" content="Квиз из пяти вопросов по видеолекции «История университета ИТМО»: персоналии и иллюстрации.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0e1d; --surface:#12152e; --ink:#f4f1de; --muted:#aab1da; --edge:#05060f;
+  --accent:#ffd23f; --ok:#3ddc84; --ok-bg:#0e2a21; --bad:#ff5a5f; --bad-bg:#33141d;
+  --pix:"Press Start 2P","Courier New",monospace;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#e8e4d0; --surface:#fffdf2; --ink:#1a1a2e; --muted:#5d5d7a; --edge:#1a1a2e;
+  --accent:#2a4bd7; --ok:#1f9d55; --ok-bg:#dff3e5; --bad:#d62839; --bad-bg:#fbe1e4;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--body);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:0 18px}
+.wrap{width:100%;max-width:760px;padding:34px 0 52px;flex:1}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+h1{font:400 clamp(15px,4.2vw,23px)/1.6 var(--pix);margin:0;color:var(--accent);text-shadow:3px 3px 0 var(--edge)}
+
+/* пиксельная рамка: цвет задаётся через --c */
+.card,.opt,.btn,.theme,.imgbox,.fb{
+  --c:var(--ink); border:0;
+  box-shadow:-4px 0 0 0 var(--c),4px 0 0 0 var(--c),0 -4px 0 0 var(--c),0 4px 0 0 var(--c);
+}
+.theme{width:44px;height:44px;margin-right:4px;background:var(--surface);color:var(--ink);cursor:pointer;
+  font:400 20px system-ui,sans-serif;display:grid;place-items:center}
+.theme:hover{background:var(--accent);color:var(--bg)}
+.theme:focus-visible,.opt:focus-visible,.btn:focus-visible{outline:3px dashed var(--accent);outline-offset:8px}
+
+.progress{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:0 4px 10px}
+.progress i{height:14px;background:var(--surface);box-shadow:0 0 0 2px var(--muted)}
+.progress i.ok{background:var(--ok);box-shadow:0 0 0 2px var(--ink)}
+.progress i.bad{background:var(--bad);box-shadow:0 0 0 2px var(--ink)}
+.progress i.now{background:var(--accent);box-shadow:0 0 0 2px var(--ink);animation:blink 1s steps(2) infinite}
+.meta{display:flex;justify-content:space-between;font:400 10px/1.6 var(--pix);color:var(--muted);
+  text-transform:uppercase;margin:0 4px 22px}
+
+.card{background:var(--surface);margin:0 4px;padding:clamp(20px,4.5vw,34px)}
+.tag{display:inline-block;font:400 10px/1 var(--pix);text-transform:uppercase;background:var(--accent);
+  color:var(--bg);padding:8px 10px;margin-bottom:20px}
+.q{font:600 clamp(19px,3.8vw,24px)/1.4 var(--body);margin:0 0 26px;letter-spacing:-.005em}
+figure{margin:0 4px 28px}
+.imgbox{--c:var(--ink);background:#000;display:grid;place-items:center;min-height:160px}
+.imgbox img{display:block;width:100%;max-height:360px;object-fit:contain}
+.imgfail{padding:32px 16px;text-align:center;color:var(--muted);font-size:15px}
+
+.opts{display:grid;gap:18px;margin:0;padding:0;list-style:none}
+.opt{width:calc(100% - 8px);margin:0 4px;text-align:left;display:flex;gap:14px;align-items:flex-start;
+  font:500 17px/1.45 var(--body);color:var(--ink);background:var(--bg);padding:15px 16px;cursor:pointer}
+.opt .k{flex:none;width:32px;height:32px;display:grid;place-items:center;background:var(--accent);color:var(--bg);
+  font:400 11px var(--pix)}
+.opt:hover:not(:disabled){background:var(--ink);color:var(--bg)}
+.opt:hover:not(:disabled) .k{background:var(--bg);color:var(--ink)}
+.opt:active:not(:disabled){transform:translateY(2px)}
+.opt:disabled{cursor:default}
+.opt.correct{--c:var(--ok);background:var(--ok-bg);color:var(--ink)}
+.opt.correct .k{background:var(--ok);color:var(--edge)}
+.opt.wrong{--c:var(--bad);background:var(--bad-bg);color:var(--ink)}
+.opt.wrong .k{background:var(--bad);color:var(--edge)}
+.opt.dim{opacity:.5}
+
+.fb{background:var(--bg);margin:30px 4px 0;padding:18px 20px;animation:pop .2s steps(3) both}
+.fb.ok{--c:var(--ok)} .fb.bad{--c:var(--bad)}
+.fb h3{margin:0 0 12px;font:400 13px/1.4 var(--pix);color:var(--c);text-transform:uppercase}
+.fb .ans{margin:0 0 12px;font-weight:600;font-size:17px}
+.fb p{margin:0;font-size:16.5px;line-height:1.65}
+.actions{display:flex;justify-content:flex-end;margin:30px 4px 6px}
+.btn{font:400 12px/1 var(--pix);text-transform:uppercase;background:var(--accent);color:var(--bg);
+  padding:16px 20px;cursor:pointer;margin-bottom:8px;
+  box-shadow:-4px 0 0 0 var(--c),4px 0 0 0 var(--c),0 -4px 0 0 var(--c),0 4px 0 0 var(--c),0 8px 0 0 var(--edge)}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:translateY(4px);
+  box-shadow:-4px 0 0 0 var(--c),4px 0 0 0 var(--c),0 -4px 0 0 var(--c),0 4px 0 0 var(--c),0 4px 0 0 var(--edge)}
+.btn.ghost{background:var(--surface);color:var(--ink)}
+#next::after{content:"_";margin-left:6px;animation:blink 1s steps(2) infinite}
+
+.score{font:400 clamp(40px,12vw,72px)/1.1 var(--pix);margin:6px 0 14px;color:var(--accent);text-shadow:4px 4px 0 var(--edge)}
+.score span{color:var(--muted);font-size:.5em;text-shadow:none}
+.stars{font-size:30px;letter-spacing:8px;margin:0 0 20px;color:var(--accent)}
+.stars .off{color:var(--muted);opacity:.5}
+.verdict{font:600 21px/1.4 var(--body);margin:0 0 26px}
+.review{margin:0 0 26px;padding:0;list-style:none}
+.review li{display:grid;grid-template-columns:32px 1fr;gap:12px;padding:14px 0;border-bottom:2px dashed var(--muted);font-size:16.5px}
+.review li:first-child{border-top:2px dashed var(--muted)}
+.review .mark{font:400 14px/1.4 var(--pix)}
+.review .ok{color:var(--ok)} .review .bad{color:var(--bad)}
+.review small{display:block;color:var(--muted);margin-top:3px;font-size:15px}
+
+@keyframes blink{50%{opacity:0}}
+@keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:480px){
+  body{padding:0 14px;font-size:16.5px}
+  .wrap{padding-top:22px}
+  .opt{font-size:16.5px;padding:14px}
+  .actions .btn{width:100%}
+  .actions{margin-left:4px;margin-right:4px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Квиз по истории ИТМО</h1>
+    </div>
+    <button class="theme" id="theme" type="button" aria-label="Переключить тему" title="Сменить тему">◐</button>
+  </header>
+
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <div class="meta"><span id="counter"></span><span>Квиз</span></div>
+
+  <main class="card" id="card" aria-live="polite"></main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var QUESTIONS = [
+    {
+      type: "Персоналия",
+      text: "В 1900 году этот человек был приглашён мастером на механико-оптическое и часовое отделение ремесленного училища, в 1920 году возглавил техникум точной механики и оптики и техническую школу, а в 1930-е стал профессором института. О ком идёт речь?",
+      options: ["А. П. Белановский", "Н. Б. Завадский", "В. М. Арбузов", "В. Н. Чуриловский"],
+      correct: 1,
+      explain: "Завадский вместе с Белановским был приглашён на новое отделение в 1900 году, а в 1920-м возглавил техникум и техническую школу и взял на себя их переезд в здание в Демидовом переулке. В институте он вёл курс точной механики, а первые дипломы ЛИТМО получил вместе с Чуриловским. Арбузов был директором училища и первым заведующим отделением, а Белановский — преподавателем-мастером."
+    },
+    {
+      type: "Персоналия",
+      text: "Кто из сотрудников института в 1941–1942 годах разработал в блокадном Ленинграде зенитный оптический прицел ЗП-1, широко применявшийся на фронте против авиации противника?",
+      options: ["Директор института Шиканов", "Профессор Зеленкевич", "В. Н. Чуриловский", "С. Т. Цукерман"],
+      correct: 3,
+      explain: "Цукерман создал прицел ЗП-1 в осаждённом Ленинграде, где на базе мастерских и лабораторий института работал цех военно-ремонтной базы. За эту работу он получил орден «Знак Почёта» в 1942 году, затем орден Красной Звезды (1944) и медаль «За оборону Ленинграда». Шиканов руководил институтом в годы войны, а Зеленкевич возглавил проект радиотехнического факультета в 1945 году."
+    },
+    {
+      type: "Персоналия",
+      text: "Выпускник инженерно-физического факультета 1954 года, в 1970 году получивший Ленинскую премию за цикл работ по голографии в трёхмерной среде. Кто он?",
+      options: ["Ю. Н. Денисюк", "Профессор Дульнев", "Доцент Галкин", "В. Н. Чуриловский"],
+      correct: 0,
+      explain: "Денисюк окончил инженерно-физический факультет в 1954 году; его голографический метод получил международное признание, а сам он стал лауреатом Ленинской премии и членом-корреспондентом АН СССР. Метод открыл новые возможности для объёмного кино и телевидения, а также для приборов радио- и гидролокации. С его работами можно познакомиться в Музее оптики ИТМО на Биржевой линии."
+    },
+    {
+      type: "Иллюстрация",
+      text: "На фотографии — станция, которую студенты первых выпусков радиотехнического факультета изучали из-за нехватки действующей техники. Что это за станция и как она оказалась в СССР?",
+      image: {
+        src: "images/scr584.jpg",
+        fallback: "https://commons.wikimedia.org/wiki/Special:FilePath/Exterior_view_of_SCR-584.jpg?width=1000",
+        alt: "Радиолокационная станция в кузове-фургоне с параболической антенной"
+      },
+      options: [
+        "«Вюрцбург» — немецкая станция, снятая с бронепоезда",
+        "СЦР-584 — американская станция, полученная по ленд-лизу",
+        "«Редут-40» — первая советская станция типа «Пегматит»",
+        "«Кобальт-8» — отечественная станция 1950-х годов"
+      ],
+      correct: 1,
+      explain: "На фото американская станция СЦР-584, полученная СССР по ленд-лизу. Из-за отсутствия учебной литературы и техники студенты знакомились с радиолокацией на бездействующих станциях: трофейном «Вюрцбурге», СЦР-584 и первой советской станции типа «Пегматит» («Редут-40»). Действующие отечественные станции МОЗ-2, «Кобальт-8» и другие появились в лаборатории лишь в 1950-е годы."
+    },
+    {
+      type: "Иллюстрация",
+      text: "Станция типа «Вюрцбург», показанная на фото, использовалась как учебное пособие на радиотехническом факультете. Откуда она попала в лабораторию?",
+      image: {
+        src: "images/wurzburg.jpg",
+        fallback: "https://commons.wikimedia.org/wiki/Special:FilePath/W%C3%BCrzburg.Radar.jpg?width=1000",
+        alt: "Подвижная радиолокационная станция с рупорной антенной на тележке"
+      },
+      options: [
+        "Её сняли с немецкого бронепоезда",
+        "Её передали по ленд-лизу из США",
+        "Её изготовили в мастерских ремесленного училища",
+        "Её подарил Государственный оптический институт"
+      ],
+      correct: 0,
+      explain: "Станцию, снятую с немецкого бронепоезда, использовали как трофейное пособие в бездействующем виде. Радиотехнический факультет открылся в сентябре 1945 года (сначала как электроприборостроительный), а к концу второго года его существования состоялся первый выпуск инженеров-радиомехаников. Это были первые специалисты такого профиля в СССР."
+    }
+  ];
+
+  var LETTERS = ["А","Б","В","Г"];
+  var state = { i: 0, answers: [], locked: false };
+
+  var card = document.getElementById("card");
+  var progress = document.getElementById("progress");
+  var counter = document.getElementById("counter");
+
+  function el(tag, cls, text){
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function drawProgress(){
+    progress.textContent = "";
+    for (var k = 0; k < QUESTIONS.length; k++){
+      var seg = document.createElement("i");
+      if (k < state.answers.length){
+        seg.className = state.answers[k] === QUESTIONS[k].correct ? "ok" : "bad";
+      } else if (k === state.i && state.i < QUESTIONS.length){
+        seg.className = "now";
+      }
+      progress.appendChild(seg);
+    }
+  }
+
+  function renderQuestion(){
+    var q = QUESTIONS[state.i];
+    state.locked = false;
+    drawProgress();
+    counter.textContent = "Уровень " + (state.i + 1) + "/" + QUESTIONS.length;
+    card.textContent = "";
+
+    card.appendChild(el("span", "tag", q.type));
+    card.appendChild(el("h2", "q", q.text));
+
+    if (q.image){
+      var fig = el("figure");
+      var box = el("div", "imgbox");
+      var img = document.createElement("img");
+      img.alt = q.image.alt;
+      img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", function(){
+        if (q.image.fallback && img.getAttribute("src") !== q.image.fallback){ img.src = q.image.fallback; return; }
+        box.textContent = "";
+        box.appendChild(el("div", "imgfail", "Не удалось загрузить иллюстрацию. Проверьте подключение и обновите страницу."));
+      });
+      img.src = q.image.src;
+      box.appendChild(img);
+      fig.appendChild(box);
+      card.appendChild(fig);
+    }
+
+    var list = el("ul", "opts");
+    q.options.forEach(function(text, idx){
+      var li = document.createElement("li");
+      var b = el("button", "opt");
+      b.type = "button";
+      b.appendChild(el("span", "k", LETTERS[idx]));
+      b.appendChild(el("span", null, text));
+      b.addEventListener("click", function(){ choose(idx); });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+    card.appendChild(list);
+    var holder = el("div"); holder.id = "fbHolder";
+    card.appendChild(holder);
+  }
+
+  function choose(idx){
+    if (state.locked) return;
+    state.locked = true;
+    var q = QUESTIONS[state.i];
+    state.answers.push(idx);
+    drawProgress();
+    var ok = idx === q.correct;
+
+    card.querySelectorAll(".opt").forEach(function(b, n){
+      b.disabled = true;
+      if (n === q.correct) b.classList.add("correct");
+      else if (n === idx) b.classList.add("wrong");
+      else b.classList.add("dim");
+    });
+
+    var fb = el("div", "fb " + (ok ? "ok" : "bad"));
+    fb.setAttribute("role", "status");
+    fb.appendChild(el("h3", null, ok ? "Верно!" : "Мимо!"));
+    fb.appendChild(el("p", "ans", "Правильный ответ: " + q.options[q.correct]));
+    fb.appendChild(el("p", null, q.explain));
+    var holder = document.getElementById("fbHolder");
+    holder.appendChild(fb);
+
+    var actions = el("div", "actions");
+    var last = state.i === QUESTIONS.length - 1;
+    var next = el("button", "btn", last ? "Результат" : "Далее");
+    next.type = "button";
+    next.id = "next";
+    next.addEventListener("click", advance);
+    actions.appendChild(next);
+    holder.appendChild(actions);
+    next.focus({ preventScroll: true });
+    fb.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function advance(){
+    state.i++;
+    if (state.i < QUESTIONS.length) { renderQuestion(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else renderResult();
+  }
+
+  function renderResult(){
+    drawProgress();
+    counter.textContent = "Счёт";
+    card.textContent = "";
+    var score = 0;
+    state.answers.forEach(function(a, n){ if (a === QUESTIONS[n].correct) score++; });
+
+    var msg = score === 5 ? "Все уровни пройдены без потерь!"
+            : score >= 4 ? "Почти идеально. Остался один промах."
+            : score >= 3 ? "Неплохо, но часть деталей стоит повторить."
+            : "Есть что повторить — попробуйте ещё раз.";
+
+    card.appendChild(el("span", "tag", "Игра окончена"));
+    var big = el("div", "score", String(score));
+    big.appendChild(el("span", null, " / " + QUESTIONS.length));
+    card.appendChild(big);
+    var stars = el("div", "stars");
+    for (var z = 0; z < QUESTIONS.length; z++){
+      stars.appendChild(el("span", z < score ? "" : "off", "★"));
+    }
+    card.appendChild(stars);
+    card.appendChild(el("p", "verdict", msg));
+
+    var ul = el("ul", "review");
+    QUESTIONS.forEach(function(q, n){
+      var ok = state.answers[n] === q.correct;
+      var li = document.createElement("li");
+      li.appendChild(el("span", "mark " + (ok ? "ok" : "bad"), ok ? "✓" : "✗"));
+      var d = document.createElement("div");
+      d.appendChild(document.createTextNode((n + 1) + ". " + q.type));
+      d.appendChild(el("small", null, "Правильный ответ: " + q.options[q.correct]));
+      li.appendChild(d);
+      ul.appendChild(li);
+    });
+    card.appendChild(ul);
+
+    var actions = el("div", "actions");
+    var again = el("button", "btn ghost", "Ещё раз");
+    again.type = "button";
+    again.addEventListener("click", function(){
+      state = { i: 0, answers: [], locked: false };
+      renderQuestion();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    actions.appendChild(again);
+    card.appendChild(actions);
+  }
+
+  document.addEventListener("keydown", function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (state.i >= QUESTIONS.length) return;
+    var q = QUESTIONS[state.i];
+    if (!state.locked){
+      var n = parseInt(e.key, 10);
+      if (n >= 1 && n <= q.options.length){ choose(n - 1); }
+    }
+  });
+
+  var root = document.documentElement;
+  var themeBtn = document.getElementById("theme");
+  try { var saved = localStorage.getItem("quiz-theme-console"); if (saved) root.setAttribute("data-theme", saved); } catch (e) {}
+  themeBtn.addEventListener("click", function(){
+    var current = root.getAttribute("data-theme");
+    if (!current) current = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    var nextTheme = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", nextTheme);
+    try { localStorage.setItem("quiz-theme-console", nextTheme); } catch (e) {}
+  });
+
+  renderQuestion();
+})();
+</script>
+</body>
+</html>
